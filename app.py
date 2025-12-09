@@ -1,137 +1,183 @@
-# app.py
 import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
-import os
-from utils import make_input_df_from_form, batch_predict_from_file
-from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+import pickle
 
-st.set_page_config(page_title="Alzheimer's Early Detection Demo", layout="centered")
+# ============================
+#   LOAD MODEL & FEATURES
+# ============================
+MODEL_PATH = "models/alzheimers_rf_pipeline.joblib"
+FEATURES_PATH = "models/feature_names.pkl"
 
-# --- Config: path to your saved pipeline ---
-MODEL_PATH = "models/alzheimers_rf_pipeline.joblib"  # update if different
+model = joblib.load(MODEL_PATH)
+feature_names = joblib.load(FEATURES_PATH)
 
-st.title("Early Detection of Alzheimer’s Disease — Demo")
-st.markdown("""
-This demo uses a saved Random Forest pipeline (preprocessing + classifier) to predict Alzheimer's diagnosis.
-Upload a CSV for batch predictions or input features for a single prediction.
-""")
+# ============================
+# PAGE CONFIG
+# ============================
+st.set_page_config(
+    page_title="Alzheimer's Early Detection",
+    page_icon="🧠",
+    layout="centered"  # Center the layout for better alignment
+)
 
-# Load model
-@st.cache_resource
-def load_model(path):
-    if not os.path.exists(path):
-        st.error(f"Model file not found at {path}. Place model in models/ and restart.")
-        return None
-    pipeline = joblib.load(path)
-    return pipeline
+# ============================
+# HEADER
+# ============================
+st.markdown(
+    """
+    <style>
+        .main-header {
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .sub-header {
+            text-align: center;
+            font-size: 18px;
+            color: #7f8c8d;
+        }
+    </style>
+    <div class="main-header">🧠 Alzheimer's Early Detection System</div>
+    <div class="sub-header">AI-powered patient assessment</div>
+    """,
+    unsafe_allow_html=True
+)
 
-pipeline = load_model(MODEL_PATH)
-if pipeline is None:
-    st.stop()
+# ============================
+# LAYOUT CONFIGURATION
+# ============================
+# Use tabs for better organization
+st.write("### Patient Information")
+tabs = st.tabs(["Demographics & Lifestyle", "Medical History", "Clinical Measurements", "Cognitive & Symptoms"])
 
-# Determine feature names expected by pipeline (from preprocessor)
-# We try to infer expected feature names from pipeline preprocessor if possible.
-try:
-    preproc = pipeline.named_steps['preproc']
-    # if ColumnTransformer with transformers, try to assemble feature names
-    col_names = None
-    if hasattr(preproc, "transformers_"):
-        # best-effort to reconstruct numeric and categorical names from fitted transformers:
-        # In many cases getting feature names is nontrivial; fallback to reading from a saved list if you stored it.
-        # For simplicity, require user to upload CSV with appropriate columns or read from sample header.
-        col_names = None
+# ============================
+# TAB 1: DEMOGRAPHICS & LIFESTYLE
+# ============================
+with tabs[0]:
+    st.subheader("👤 Demographic Details")
+    col1, col2 = st.columns(2)
+    with col1:
+        Age = st.number_input("Age", min_value=60, max_value=100, value=70)
+        Gender = st.selectbox("Gender", ["Male", "Female"])
+        Ethnicity = st.selectbox("Ethnicity", ["Caucasian", "African American", "Asian", "Other"])
+        EducationLevel = st.selectbox("Education Level", ["None", "High School", "Bachelor's", "Higher"])
+    with col2:
+        BMI = st.number_input("BMI", min_value=15.0, max_value=40.0, value=22.0)
+        Smoking = st.radio("Smoking", ["No", "Yes"])
+        AlcoholConsumption = st.number_input("Alcohol Consumption (per week)", 0, 20, 2)
+        PhysicalActivity = st.number_input("Weekly Physical Activity (hours)", 0, 10, 3)
+        DietQuality = st.slider("Diet Quality Score", 0, 10, 6)
+        SleepQuality = st.slider("Sleep Quality Score", 4, 10, 7)
+
+# ============================
+# TAB 2: MEDICAL HISTORY
+# ============================
+with tabs[1]:
+    st.subheader("🩺 Medical History")
+    FamilyHistoryAlzheimers = st.radio("Family History of Alzheimer's", ["No", "Yes"])
+    CardiovascularDisease = st.radio("Cardiovascular Disease", ["No", "Yes"])
+    Diabetes = st.radio("Diabetes", ["No", "Yes"])
+    Depression = st.radio("Depression", ["No", "Yes"])
+    HeadInjury = st.radio("Head Injury", ["No", "Yes"])
+    Hypertension = st.radio("Hypertension", ["No", "Yes"])
+
+# ============================
+# TAB 3: CLINICAL MEASUREMENTS
+# ============================
+with tabs[2]:
+    st.subheader("📊 Clinical Measurements")
+    col1, col2 = st.columns(2)
+    with col1:
+        SystolicBP = st.number_input("Systolic BP", 90, 180, 120)
+        DiastolicBP = st.number_input("Diastolic BP", 60, 120, 80)
+        CholesterolTotal = st.number_input("Total Cholesterol", 150, 300, 200)
+    with col2:
+        CholesterolLDL = st.number_input("LDL Cholesterol", 50, 200, 120)
+        CholesterolHDL = st.number_input("HDL Cholesterol", 20, 100, 55)
+        CholesterolTriglycerides = st.number_input("Triglycerides", 50, 400, 150)
+
+# ============================
+# TAB 4: COGNITIVE & SYMPTOMS
+# ============================
+with tabs[3]:
+    st.subheader("🧩 Cognitive & Functional Scores")
+    col1, col2 = st.columns(2)
+    with col1:
+        MMSE = st.slider("MMSE Score", 0, 30, 22)
+        FunctionalAssessment = st.slider("Functional Assessment", 0, 10, 5)
+        ADL = st.slider("ADL Score", 0, 10, 6)
+    with col2:
+        Confusion = st.radio("Confusion", ["No", "Yes"])
+        Disorientation = st.radio("Disorientation", ["No", "Yes"])
+        PersonalityChanges = st.radio("Personality Changes", ["No", "Yes"])
+        DifficultyCompletingTasks = st.radio("Difficulty Completing Tasks", ["No", "Yes"])
+        Forgetfulness = st.radio("Forgetfulness", ["No", "Yes"])
+        BehavioralProblems = st.radio("Behavioral Problems", ["No", "Yes"])
+        MemoryComplaints = st.radio("Memory Complaints", ["No", "Yes"])
+
+# ============================
+# Convert all values exactly like Dataset
+# ============================
+
+def convert_to_numeric():
+    mapping = {
+        "Male": 0, "Female": 1,
+        "No": 0, "Yes": 1,
+        "Caucasian": 0, "African American": 1, "Asian": 2, "Other": 3,
+        "None": 0, "High School": 1, "Bachelor's": 2, "Higher": 3
+    }
+
+    data = {
+        "Age": Age,
+        "Gender": mapping[Gender],
+        "Ethnicity": mapping[Ethnicity],
+        "EducationLevel": mapping[EducationLevel],
+        "BMI": BMI,
+        "Smoking": mapping[Smoking],
+        "AlcoholConsumption": AlcoholConsumption,
+        "PhysicalActivity": PhysicalActivity,
+        "DietQuality": DietQuality,
+        "SleepQuality": SleepQuality,
+        "FamilyHistoryAlzheimers": mapping[FamilyHistoryAlzheimers],
+        "CardiovascularDisease": mapping[CardiovascularDisease],
+        "Diabetes": mapping[Diabetes],
+        "Depression": mapping[Depression],
+        "HeadInjury": mapping[HeadInjury],
+        "Hypertension": mapping[Hypertension],
+        "SystolicBP": SystolicBP,
+        "DiastolicBP": DiastolicBP,
+        "CholesterolTotal": CholesterolTotal,
+        "CholesterolLDL": CholesterolLDL,
+        "CholesterolHDL": CholesterolHDL,
+        "CholesterolTriglycerides": CholesterolTriglycerides,
+        "MMSE": MMSE,
+        "FunctionalAssessment": FunctionalAssessment,
+        "MemoryComplaints": mapping[MemoryComplaints],
+        "BehavioralProblems": mapping[BehavioralProblems],
+        "ADL": ADL,
+        "Confusion": mapping[Confusion],
+        "Disorientation": mapping[Disorientation],
+        "PersonalityChanges": mapping[PersonalityChanges],
+        "DifficultyCompletingTasks": mapping[DifficultyCompletingTasks],
+        "Forgetfulness": mapping[Forgetfulness]
+    }
+
+    return pd.DataFrame([data])[feature_names]
+
+
+# ============================
+# PREDICTION BUTTON
+# ============================
+st.write("### Prediction")
+if st.button("🔍 Predict Alzheimer's Risk", use_container_width=True):
+    input_df = convert_to_numeric()
+    pred = model.predict(input_df)[0]
+    prob = model.predict_proba(input_df)[0][1]
+
+    if pred == 1:
+        st.error(f"⚠ High Risk of Alzheimer's (Probability: {prob:.2f})")
     else:
-        col_names = None
-except Exception:
-    col_names = None
-
-st.sidebar.header("Options")
-show_metrics = st.sidebar.checkbox("Show evaluation metrics (when uploading labelled test CSV)", value=True)
-download_sample = st.sidebar.checkbox("Show CSV sample for batch input", value=True)
-
-st.header("Single sample prediction")
-st.write("Enter feature values for a single patient.")
-
-# For simplicity: attempt to get feature list from a sample CSV (you can replace this with a hard-coded list)
-# If you want a hard-coded feature list, put it here:
-FEATURES = None
-if FEATURES is None:
-    # try to read from an example file shipped with app or allow user to upload sample
-    st.info("If the app can't auto-detect features, upload a sample CSV or paste values for the fields.")
-    uploaded_sample = st.file_uploader("(Optional) Upload a sample CSV with column headers to auto-fill the form", type=["csv"], accept_multiple_files=False)
-    if uploaded_sample is not None:
-        df_sample = pd.read_csv(uploaded_sample)
-        FEATURES = [c for c in df_sample.columns if c != 'Diagnosis' and c != 'DoctorInCharge' and c != 'PatientID']
-    else:
-        # fallback: ask user to upload at least once or manually specify
-        if st.button("I will provide a sample CSV later; show manual input form"):
-            st.info("Upload a CSV in the 'Batch prediction' section and use 'Single sample' later.")
-        FEATURES = []
-
-# If we have features, render inputs
-form_values = {}
-if FEATURES:
-    with st.form(key="single_form"):
-        for col in FEATURES:
-            # assume numeric for your dataset — use number_input
-            default = 0.0
-            try:
-                # If sample df exists, infer mean
-                if 'df_sample' in locals() and col in df_sample.columns:
-                    default = float(df_sample[col].mean())
-            except Exception:
-                default = 0.0
-            form_values[col] = st.number_input(f"{col}", value=default, format="%.6f")
-        submit = st.form_submit_button("Predict single sample")
-    if submit:
-        X_single = make_input_df_from_form(FEATURES, form_values)
-        pred = pipeline.predict(X_single)[0]
-        st.success(f"Predicted label: {pred}")
-        if hasattr(pipeline, "predict_proba"):
-            prob = pipeline.predict_proba(X_single)[:, 1][0]
-            st.write(f"Probability (positive class): {prob:.3f}")
-
-else:
-    st.warning("No feature list detected. Upload a sample CSV in 'Batch prediction' to enable single-sample form.")
-
-st.header("Batch prediction (CSV)")
-uploaded_file = st.file_uploader("Upload CSV file with the same columns used during model training", type=["csv"])
-
-if uploaded_file is not None:
-    try:
-        df_uploaded = pd.read_csv(uploaded_file)
-        # remove non-feature columns if present
-        candidate_features = [c for c in df_uploaded.columns if c not in ('PatientID', 'DoctorInCharge', 'Diagnosis')]
-        st.write("Uploaded file columns:", df_uploaded.columns.tolist())
-        st.write("Using features:", candidate_features)
-        results_df = batch_predict_from_file(pipeline, df_uploaded, candidate_features)
-        st.write("Predictions (first 10 rows):")
-        st.dataframe(results_df.head(10))
-        # Provide download
-        csv = results_df.to_csv(index=False).encode('utf-8')
-        st.download_button("Download predictions CSV", csv, "predictions.csv", "text/csv")
-        # If label column present and user wants metrics
-        if 'Diagnosis' in df_uploaded.columns and show_metrics:
-            y_true = df_uploaded['Diagnosis']
-            y_pred = results_df['predicted_label']
-            st.subheader("Evaluation metrics on uploaded labelled file")
-            st.text("Confusion Matrix:")
-            st.write(confusion_matrix(y_true, y_pred))
-            st.text("Classification report:")
-            st.text(classification_report(y_true, y_pred))
-            if hasattr(pipeline, "predict_proba"):
-                try:
-                    roc = roc_auc_score(y_true, pipeline.predict_proba(df_uploaded[candidate_features])[:,1])
-                    st.write("ROC-AUC:", roc)
-                except Exception as e:
-                    st.write("ROC-AUC could not be computed:", e)
-    except Exception as e:
-        st.error(f"Error processing uploaded file: {e}")
-
-st.markdown("---")
-st.markdown("**How to use**: \n1. Prepare CSV with columns matching training features (exclude PatientID/DoctorInCharge/Diagnosis for batch prediction if you don't want labels). \n2. For single sample, upload a sample CSV first to auto-fill form OR hard-code FEATURES list in app.py. \n3. Click Predict and download results.")
-
-st.sidebar.markdown("### Deployment tips")
-st.sidebar.info("To run locally: `streamlit run app.py`  \nTo deploy: push repo to Streamlit Cloud and point to this app. Make sure models/ contains your joblib file.")
+        st.success(f"✔ Low Risk (Probability: {prob:.2f})")
