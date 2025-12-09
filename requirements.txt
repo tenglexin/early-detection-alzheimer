@@ -6,8 +6,8 @@ wheel>=0.40.0
 streamlit
 
 # scikit-learn and its dependencies
-scikit-learn==1.6.1 --only-binary :all:
-numpy==1.23.5
+scikit-learn==1.6.1
+numpy==2.3.5
 scipy==1.9.3
 joblib==1.2.0
 threadpoolctl==3.1.0
