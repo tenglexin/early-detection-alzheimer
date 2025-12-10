@@ -53,9 +53,7 @@ st.markdown(
 st.write("### Patient Information")
 tabs = st.tabs(["Demographics & Lifestyle", "Medical History", "Clinical Measurements", "Cognitive & Symptoms"])
 
-# ============================
-# TAB 1: DEMOGRAPHICS & LIFESTYLE
-# ============================
+# Display the content of the first tab by default
 with tabs[0]:
     st.subheader("👤 Demographic Details")
     col1, col2 = st.columns(2)
