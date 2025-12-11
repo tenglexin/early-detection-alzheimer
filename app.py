@@ -51,75 +51,29 @@ st.markdown(
 # ============================
 # Use tabs for better organization
 st.write("### Patient Information")
-tabs = st.tabs(["Demographics & Lifestyle", "Medical History", "Clinical Measurements", "Cognitive & Symptoms"])
 
-# Display the content of the first tab by default
-with tabs[0]:
-    st.subheader("👤 Demographic Details")
-    col1, col2 = st.columns(2)
-    with col1:
-        Age = st.number_input("Age", min_value=60, max_value=100, value=70)
-        Gender = st.selectbox("Gender", ["Male", "Female"])
-        Ethnicity = st.selectbox("Ethnicity", ["Caucasian", "African American", "Asian", "Other"])
-        EducationLevel = st.selectbox("Education Level", ["None", "High School", "Bachelor's", "Higher"])
-    with col2:
-        BMI = st.number_input("BMI", min_value=15.0, max_value=40.0, value=22.0)
-        Smoking = st.radio("Smoking", ["No", "Yes"])
-        AlcoholConsumption = st.number_input("Alcohol Consumption (per week)", 0, 20, 2)
-        PhysicalActivity = st.number_input("Weekly Physical Activity (hours)", 0, 10, 3)
-        DietQuality = st.slider("Diet Quality Score", 0, 10, 6)
-        SleepQuality = st.slider("Sleep Quality Score", 4, 10, 7)
+# Developer Mode toggle (header-only)
+dev_mode = st.checkbox("Developer Mode (Exact Inputs for Spot Testing)")
 
-# ============================
-# TAB 2: MEDICAL HISTORY
-# ============================
-with tabs[1]:
-    st.subheader("🩺 Medical History")
-    FamilyHistoryAlzheimers = st.radio("Family History of Alzheimer's", ["No", "Yes"])
-    CardiovascularDisease = st.radio("Cardiovascular Disease", ["No", "Yes"])
-    Diabetes = st.radio("Diabetes", ["No", "Yes"])
-    Depression = st.radio("Depression", ["No", "Yes"])
-    HeadInjury = st.radio("Head Injury", ["No", "Yes"])
-    Hypertension = st.radio("Hypertension", ["No", "Yes"])
+# Section navigation state
+sections = [
+    "Demographics & Lifestyle",
+    "Medical History",
+    "Clinical Measurements",
+    "Cognitive",
+    "Symptoms"
+]
+if "current_section" not in st.session_state:
+    st.session_state.current_section = 0
+if "completed_sections" not in st.session_state:
+    st.session_state.completed_sections = {i: False for i in range(len(sections))}
+
+
+tabs = st.tabs(sections)
 
 # ============================
-# TAB 3: CLINICAL MEASUREMENTS
+# Convert all values exactly like Dataset (define before rendering)
 # ============================
-with tabs[2]:
-    st.subheader("📊 Clinical Measurements")
-    col1, col2 = st.columns(2)
-    with col1:
-        SystolicBP = st.number_input("Systolic BP", 90, 180, 120)
-        DiastolicBP = st.number_input("Diastolic BP", 60, 120, 80)
-        CholesterolTotal = st.number_input("Total Cholesterol", 150, 300, 200)
-    with col2:
-        CholesterolLDL = st.number_input("LDL Cholesterol", 50, 200, 120)
-        CholesterolHDL = st.number_input("HDL Cholesterol", 20, 100, 55)
-        CholesterolTriglycerides = st.number_input("Triglycerides", 50, 400, 150)
-
-# ============================
-# TAB 4: COGNITIVE & SYMPTOMS
-# ============================
-with tabs[3]:
-    st.subheader("🧩 Cognitive & Functional Scores")
-    col1, col2 = st.columns(2)
-    with col1:
-        MMSE = st.slider("MMSE Score", 0, 30, 22)
-        FunctionalAssessment = st.slider("Functional Assessment", 0, 10, 5)
-        ADL = st.slider("ADL Score", 0, 10, 6)
-    with col2:
-        Confusion = st.radio("Confusion", ["No", "Yes"])
-        Disorientation = st.radio("Disorientation", ["No", "Yes"])
-        PersonalityChanges = st.radio("Personality Changes", ["No", "Yes"])
-        DifficultyCompletingTasks = st.radio("Difficulty Completing Tasks", ["No", "Yes"])
-        Forgetfulness = st.radio("Forgetfulness", ["No", "Yes"])
-        BehavioralProblems = st.radio("Behavioral Problems", ["No", "Yes"])
-        MemoryComplaints = st.radio("Memory Complaints", ["No", "Yes"])
-
-# ============================
-# Convert all values exactly like Dataset
-# ============================
-
 def convert_to_numeric():
     mapping = {
         "Male": 0, "Female": 1,
@@ -129,53 +83,254 @@ def convert_to_numeric():
     }
 
     data = {
-        "Age": Age,
-        "Gender": mapping[Gender],
-        "Ethnicity": mapping[Ethnicity],
-        "EducationLevel": mapping[EducationLevel],
-        "BMI": BMI,
-        "Smoking": mapping[Smoking],
-        "AlcoholConsumption": AlcoholConsumption,
-        "PhysicalActivity": PhysicalActivity,
-        "DietQuality": DietQuality,
-        "SleepQuality": SleepQuality,
-        "FamilyHistoryAlzheimers": mapping[FamilyHistoryAlzheimers],
-        "CardiovascularDisease": mapping[CardiovascularDisease],
-        "Diabetes": mapping[Diabetes],
-        "Depression": mapping[Depression],
-        "HeadInjury": mapping[HeadInjury],
-        "Hypertension": mapping[Hypertension],
-        "SystolicBP": SystolicBP,
-        "DiastolicBP": DiastolicBP,
-        "CholesterolTotal": CholesterolTotal,
-        "CholesterolLDL": CholesterolLDL,
-        "CholesterolHDL": CholesterolHDL,
-        "CholesterolTriglycerides": CholesterolTriglycerides,
-        "MMSE": MMSE,
-        "FunctionalAssessment": FunctionalAssessment,
-        "MemoryComplaints": mapping[MemoryComplaints],
-        "BehavioralProblems": mapping[BehavioralProblems],
-        "ADL": ADL,
-        "Confusion": mapping[Confusion],
-        "Disorientation": mapping[Disorientation],
-        "PersonalityChanges": mapping[PersonalityChanges],
-        "DifficultyCompletingTasks": mapping[DifficultyCompletingTasks],
-        "Forgetfulness": mapping[Forgetfulness]
+        "Age": st.session_state.get("Age", 70),
+        "Gender": mapping[st.session_state.get("Gender", "Male")],
+        "Ethnicity": mapping[st.session_state.get("Ethnicity", "Caucasian")],
+        "EducationLevel": mapping[st.session_state.get("EducationLevel", "High School")],
+        "BMI": st.session_state.get("BMI", 22.0),
+        "Smoking": mapping[st.session_state.get("Smoking", "No")],
+        "AlcoholConsumption": st.session_state.get("AlcoholConsumption", 2),
+        "PhysicalActivity": st.session_state.get("PhysicalActivity", 3 if not dev_mode else 3.0),
+        "DietQuality": st.session_state.get("DietQuality", 6 if not dev_mode else 6.0),
+        "SleepQuality": st.session_state.get("SleepQuality", 7 if not dev_mode else 7.0),
+        "FamilyHistoryAlzheimers": mapping[st.session_state.get("FamilyHistoryAlzheimers", "No")],
+        "CardiovascularDisease": mapping[st.session_state.get("CardiovascularDisease", "No")],
+        "Diabetes": mapping[st.session_state.get("Diabetes", "No")],
+        "Depression": mapping[st.session_state.get("Depression", "No")],
+        "HeadInjury": mapping[st.session_state.get("HeadInjury", "No")],
+        "Hypertension": mapping[st.session_state.get("Hypertension", "No")],
+        "SystolicBP": st.session_state.get("SystolicBP", 120),
+        "DiastolicBP": st.session_state.get("DiastolicBP", 80),
+        "CholesterolTotal": st.session_state.get("CholesterolTotal", 200),
+        "CholesterolLDL": st.session_state.get("CholesterolLDL", 120),
+        "CholesterolHDL": st.session_state.get("CholesterolHDL", 55),
+        "CholesterolTriglycerides": st.session_state.get("CholesterolTriglycerides", 150),
+        "MMSE": st.session_state.get("MMSE", 22 if not dev_mode else 22.0),
+        "FunctionalAssessment": st.session_state.get("FunctionalAssessment", 5 if not dev_mode else 5.0),
+        "MemoryComplaints": mapping[st.session_state.get("MemoryComplaints", "No")],
+        "BehavioralProblems": mapping[st.session_state.get("BehavioralProblems", "No")],
+        "ADL": st.session_state.get("ADL", 6 if not dev_mode else 6.0),
+        "Confusion": mapping[st.session_state.get("Confusion", "No")],
+        "Disorientation": mapping[st.session_state.get("Disorientation", "No")],
+        "PersonalityChanges": mapping[st.session_state.get("PersonalityChanges", "No")],
+        "DifficultyCompletingTasks": mapping[st.session_state.get("DifficultyCompletingTasks", "No")],
+        "Forgetfulness": mapping[st.session_state.get("Forgetfulness", "No")]
     }
 
     return pd.DataFrame([data])[feature_names]
 
+# Helper: navigation buttons
+def nav_controls():
+    cols = st.columns(2)
+    with cols[0]:
+        if st.session_state.current_section > 0:
+            if st.button("← Previous", use_container_width=True, key=f"prev_{st.session_state.current_section}"):
+                st.session_state.current_section -= 1
+                st.rerun()
+    with cols[1]:
+        if st.session_state.current_section < len(sections) - 1:
+            if st.button("Next →", use_container_width=True, key=f"next_{st.session_state.current_section}"):
+                st.session_state.completed_sections[st.session_state.current_section] = True
+                st.session_state.current_section += 1
+                st.rerun()
+
+# Render current section content
+with tabs[0]:
+    st.subheader("👤 Demographic Details")
+    col1, col2 = st.columns(2)
+    with col1:
+        Age = st.number_input("Age", min_value=60, max_value=100, value=70, key="Age")
+        Gender = st.selectbox("Gender", ["Male", "Female"], key="Gender")
+        Ethnicity = st.selectbox("Ethnicity", ["Caucasian", "African American", "Asian", "Other"], key="Ethnicity")
+        EducationLevel = st.selectbox("Education Level", ["None", "High School", "Bachelor's", "Higher"], key="EducationLevel")
+    with col2:
+        BMI = st.number_input(
+            "BMI",
+            min_value=0.0,
+            max_value=100.0,
+            value=22.0,
+            step=0.000001 if dev_mode else 0.1,
+            format="%.6f" if dev_mode else None,
+            key="BMI"
+        )
+        Smoking = st.radio("Smoking", ["No", "Yes"], key="Smoking")
+        AlcoholConsumption = st.number_input(
+            "Alcohol Consumption (per week)",
+            min_value=0.0,
+            max_value=50.0,
+            value=2.0,
+            step=0.000001 if dev_mode else 1.0,
+            format="%.6f" if dev_mode else None,
+            key="AlcoholConsumption"
+        )
+        PhysicalActivity = st.number_input(
+            "Weekly Physical Activity (hours)",
+            min_value=0.0 if dev_mode else 0,
+            max_value=10.0 if dev_mode else 10,
+            value=3.0 if dev_mode else 3,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="PhysicalActivity"
+        )
+    # No nav_controls needed with tabs
 
 # ============================
-# PREDICTION BUTTON
+# TAB 2: MEDICAL HISTORY
 # ============================
-st.write("### Prediction")
-if st.button("🔍 Predict Alzheimer's Risk", use_container_width=True):
-    input_df = convert_to_numeric()
-    pred = model.predict(input_df)[0]
-    prob = model.predict_proba(input_df)[0][1]
+with tabs[1]:
+    st.subheader("🩺 Medical History")
+    mc1, mc2 = st.columns(2)
+    with mc1:
+        FamilyHistoryAlzheimers = st.radio("Family History of Alzheimer's", ["No", "Yes"], key="FamilyHistoryAlzheimers")
+        CardiovascularDisease = st.radio("Cardiovascular Disease", ["No", "Yes"], key="CardiovascularDisease")
+        Diabetes = st.radio("Diabetes", ["No", "Yes"], key="Diabetes")
+    with mc2:
+        Depression = st.radio("Depression", ["No", "Yes"], key="Depression")
+        HeadInjury = st.radio("Head Injury", ["No", "Yes"], key="HeadInjury")
+        Hypertension = st.radio("Hypertension", ["No", "Yes"], key="Hypertension")
+    # No nav_controls needed with tabs
 
-    if pred == 1:
-        st.error(f"⚠ High Risk of Alzheimer's (Probability: {prob:.2f})")
-    else:
-        st.success(f"✔ Low Risk (Probability: {prob:.2f})")
+# ============================
+# TAB 3: CLINICAL MEASUREMENTS
+# ============================
+with tabs[2]:
+    st.subheader("📊 Clinical Measurements")
+    col1, col2 = st.columns(2)
+    with col1:
+        SystolicBP = st.number_input(
+            "Systolic BP",
+            min_value=90.0 if dev_mode else 90,
+            max_value=180.0 if dev_mode else 180,
+            value=120.0 if dev_mode else 120,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="SystolicBP"
+        )
+        DiastolicBP = st.number_input(
+            "Diastolic BP",
+            min_value=60.0 if dev_mode else 60,
+            max_value=120.0 if dev_mode else 120,
+            value=80.0 if dev_mode else 80,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="DiastolicBP"
+        )
+        CholesterolTotal = st.number_input(
+            "Total Cholesterol",
+            min_value=150.0 if dev_mode else 150,
+            max_value=300.0 if dev_mode else 300,
+            value=200.0 if dev_mode else 200,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="CholesterolTotal"
+        )
+    with col2:
+        CholesterolLDL = st.number_input(
+            "LDL Cholesterol",
+            min_value=50.0 if dev_mode else 50,
+            max_value=200.0 if dev_mode else 200,
+            value=120.0 if dev_mode else 120,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="CholesterolLDL"
+        )
+        CholesterolHDL = st.number_input(
+            "HDL Cholesterol",
+            min_value=20.0 if dev_mode else 20,
+            max_value=100.0 if dev_mode else 100,
+            value=55.0 if dev_mode else 55,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="CholesterolHDL"
+        )
+        CholesterolTriglycerides = st.number_input(
+            "Triglycerides",
+            min_value=50.0 if dev_mode else 50,
+            max_value=400.0 if dev_mode else 400,
+            value=150.0 if dev_mode else 150,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="CholesterolTriglycerides"
+        )
+
+with tabs[3]:
+    st.subheader("🧩 Cognitive & Functional Scores")
+    col1, col2 = st.columns(2)
+    with col1:
+        MMSE = st.number_input(
+            "MMSE Score",
+            min_value=0.0 if dev_mode else 0,
+            max_value=30.0 if dev_mode else 30,
+            value=22.0 if dev_mode else 22,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="MMSE"
+        )
+        FunctionalAssessment = st.number_input(
+            "Functional Assessment",
+            min_value=0.0 if dev_mode else 0,
+            max_value=10.0 if dev_mode else 10,
+            value=5.0 if dev_mode else 5,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="FunctionalAssessment"
+        )
+        ADL = st.number_input(
+            "ADL Score",
+            min_value=0.0 if dev_mode else 0,
+            max_value=10.0 if dev_mode else 10,
+            value=6.0 if dev_mode else 6,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="ADL"
+        )
+    with col2:
+        DietQuality = st.number_input(
+            "Diet Quality Score",
+            min_value=0.0 if dev_mode else 0,
+            max_value=10.0 if dev_mode else 10,
+            value=6.0 if dev_mode else 6,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="DietQuality"
+        )
+        SleepQuality = st.number_input(
+            "Sleep Quality Score",
+            min_value=0.0 if dev_mode else 4,
+            max_value=10.0 if dev_mode else 10,
+            value=7.0 if dev_mode else 7,
+            step=0.000001 if dev_mode else 1,
+            format="%.6f" if dev_mode else None,
+            key="SleepQuality"
+        )
+    # No nav_controls needed with tabs
+
+if len(sections) > 4:
+    with tabs[4]:
+        st.subheader("⚠ Symptoms")
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            Confusion = st.radio("Confusion", ["No", "Yes"], key="Confusion")
+            Disorientation = st.radio("Disorientation", ["No", "Yes"], key="Disorientation")
+            PersonalityChanges = st.radio("Personality Changes", ["No", "Yes"], key="PersonalityChanges")
+        with c2:
+            DifficultyCompletingTasks = st.radio("Difficulty Completing Tasks", ["No", "Yes"], key="DifficultyCompletingTasks")
+            Forgetfulness = st.radio("Forgetfulness", ["No", "Yes"], key="Forgetfulness")
+            BehavioralProblems = st.radio("Behavioral Problems", ["No", "Yes"], key="BehavioralProblems")
+        with c3:
+            MemoryComplaints = st.radio("Memory Complaints", ["No", "Yes"], key="MemoryComplaints")
+
+        # Prediction controls only on last section
+        st.write("### Prediction")
+        if st.button("🔍 Predict Alzheimer's Risk", use_container_width=True, key="predict_final"):
+            input_df = convert_to_numeric()
+            pred = model.predict(input_df)[0]
+            prob = model.predict_proba(input_df)[0][1]
+
+            # Risk-level gauge
+            st.write("### Risk Level")
+            st.progress(int(prob * 100))
+            if pred == 1:
+                st.error(f"⚠ High Risk of Alzheimer's (Probability: {prob:.2f})")
+            else:
+                st.success(f"✔ Low Risk (Probability: {prob:.2f})")
