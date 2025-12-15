@@ -1,9 +1,9 @@
-**🧠 Alzheimer’s Early Detection System**
+# 🧠 Alzheimer’s Early Detection System
 
 A machine learning–based web application for early Alzheimer’s disease risk prediction using clinical, demographic, lifestyle, and cognitive data.
 The system is powered by a Random Forest classifier and deployed as an interactive Streamlit application.
 
-**🚀 Project Overview**
+## 🚀 Project Overview
 
 This project aims to support early risk identification of Alzheimer’s disease by translating a validated machine learning model into a practical decision-support tool.
     
@@ -12,18 +12,18 @@ This project aims to support early risk identification of Alzheimer’s disease 
     - Deployed using Streamlit and Visual Studio Code
     - Focuses on non-invasive, structured clinical data
 
-⚠️ This tool is intended for educational and research purposes only and does not replace professional medical diagnosis.
+> ⚠️ This tool is intended for educational and research purposes only and does not replace professional medical diagnosis.
 
 
 
-**🧠 Model Summary**
+## 🧠 Model Summary
 
 <img width="947" height="263" alt="image" src="https://github.com/user-attachments/assets/906c7a08-c541-4aed-8c75-7dc319c06994" />
 
 
 The Random Forest model was selected due to its superior performance and robustness to class imbalance.
 
-**🖥️ Application Features**
+## 🖥️ Application Features
 - Structured patient input across:
     1. Demographics & lifestyle
     2. Medical history
@@ -37,7 +37,7 @@ The Random Forest model was selected due to its superior performance and robustn
 
 - End-to-end consistency between training and deployment
 
-**📂 Project Structure**
+## 📂 Project Structure
 
     ├── app.py                    
     
@@ -51,7 +51,7 @@ The Random Forest model was selected due to its superior performance and robustn
     
     └── README.md
 
-**▶️ How to Run the App**
+## ▶️ How to Run the App
 
     1. Install dependencies:
     
@@ -61,7 +61,7 @@ The Random Forest model was selected due to its superior performance and robustn
     
         streamlit run app.py
 
-**🧪 Developer Mode**
+## 🧪 Developer Mode
 
 The application includes a Developer Mode that allows:
     1. Exact floating-point input values
@@ -70,7 +70,7 @@ The application includes a Developer Mode that allows:
 
 This feature was used to verify identical outputs between offline experiments and real-time deployment, ensuring system reliability and reproducibility.
 
-**🛠️ Technologies Used**
+## 🛠️ Technologies Used
 
     Python
     Scikit-learn
@@ -79,7 +79,7 @@ This feature was used to verify identical outputs between offline experiments an
     Google Colab
     Visual Studio Code
 
-**📊 Dataset**
+## 📊 Dataset
 
 Alzheimer’s Disease Dataset (Kaggle)
 
@@ -87,12 +87,12 @@ https://www.kaggle.com/datasets/rabieelkharoua/alzheimers-disease-dataset
 
 Structured patient-level clinical, demographic, and cognitive features
 
-**📌 Disclaimer**
+## 📌 Disclaimer
 
 This application is a research prototype and should not be used for clinical diagnosis. Predictions are intended to assist early screening and research exploration only.
 
-**👤 Author**
+## 👤 Author
 
 Teng Le Xin
 
-Master’s Research Project – Alzheimer’s Disease Early Detection using Machine Learning
+> UTM Master’s Research Project – Alzheimer’s Disease Early Detection using Machine Learning
