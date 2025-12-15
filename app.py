@@ -329,8 +329,27 @@ if len(sections) > 4:
 
             # Risk-level gauge
             st.write("### Risk Level")
-            st.progress(int(prob * 100))
-            if pred == 1:
-                st.error(f"⚠ High Risk of Alzheimer's (Probability: {prob:.2f})")
+            # Color-coded risk gauge
+            import streamlit.components.v1 as components
+            gauge_color = (
+                "#27ae60" if prob < 0.33 else
+                "#f1c40f" if prob < 0.66 else
+                "#e74c3c"
+            )
+            # Improved risk gauge UI
+            gauge_html = f'''
+            <div style="width:100%;height:32px;background:#e0e0e0;border-radius:16px;position:relative;margin-bottom:8px;">
+                <div style="width:{int(prob*100)}%;height:100%;background:{gauge_color};border-radius:16px;transition:width 0.5s;"></div>
+                <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                    <span style="font-size:20px;font-weight:bold;color:#222;text-shadow:0 1px 2px #fff;">{int(prob*100)}%</span>
+                </div>
+            </div>
+            '''
+            components.html(gauge_html, height=40)
+            # Clear summary below gauge
+            if prob < 0.33:
+                st.markdown('<div style="color:#27ae60;font-size:18px;font-weight:bold;text-align:center;margin-top:8px;">Low risk: Model predicts a low probability of Alzheimer\'s.</div>', unsafe_allow_html=True)
+            elif prob < 0.66:
+                st.markdown('<div style="color:#f1c40f;font-size:18px;font-weight:bold;text-align:center;margin-top:8px;">Moderate risk: Model predicts a moderate probability of Alzheimer\'s.</div>', unsafe_allow_html=True)
             else:
-                st.success(f"✔ Low Risk (Probability: {prob:.2f})")
+                st.markdown('<div style="color:#e74c3c;font-size:18px;font-weight:bold;text-align:center;margin-top:8px;">High risk: Model predicts a high probability of Alzheimer\'s.</div>', unsafe_allow_html=True)
