@@ -4,27 +4,21 @@ import numpy as np
 import joblib
 import pickle
 
-# ============================
 #   LOAD MODEL & FEATURES
-# ============================
 MODEL_PATH = "models/alzheimers_rf_pipeline.joblib"
 FEATURES_PATH = "models/feature_names.pkl"
 
 model = joblib.load(MODEL_PATH)
 feature_names = joblib.load(FEATURES_PATH)
 
-# ============================
 # PAGE CONFIG
-# ============================
 st.set_page_config(
     page_title="Alzheimer's Early Detection",
     page_icon="🧠",
     layout="centered"  # Center the layout for better alignment
 )
 
-# ============================
 # HEADER
-# ============================
 st.markdown(
     """
     <style>
@@ -46,9 +40,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ============================
 # LAYOUT CONFIGURATION
-# ============================
 # Use tabs for better organization
 st.write("### Patient Information")
 
@@ -71,9 +63,7 @@ if "completed_sections" not in st.session_state:
 
 tabs = st.tabs(sections)
 
-# ============================
 # Convert all values exactly like Dataset (define before rendering)
-# ============================
 def convert_to_numeric():
     mapping = {
         "Male": 0, "Female": 1,
@@ -174,9 +164,7 @@ with tabs[0]:
         )
     # No nav_controls needed with tabs
 
-# ============================
 # TAB 2: MEDICAL HISTORY
-# ============================
 with tabs[1]:
     st.subheader("🩺 Medical History")
     mc1, mc2 = st.columns(2)
@@ -190,9 +178,7 @@ with tabs[1]:
         Hypertension = st.radio("Hypertension", ["No", "Yes"], key="Hypertension")
     # No nav_controls needed with tabs
 
-# ============================
 # TAB 3: CLINICAL MEASUREMENTS
-# ============================
 with tabs[2]:
     st.subheader("📊 Clinical Measurements")
     col1, col2 = st.columns(2)
